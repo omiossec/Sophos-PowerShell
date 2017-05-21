@@ -25,14 +25,23 @@ function new-XGFirewall
 .PARAMETER mode
     Specify the firewall mode, Transparant, Nat, Promiscuis
 
-.PARAMETER defaultvswitch
+.PARAMETER adminvswitch
 	Specify the default vSwitch for the Admin interface
 
-.PARAMETER interfaces
-	Specify interface name, mode and vswitch
+.PARAMETER adminvlan
+	Specify the default vlan for the Admin interface
+
+.PARAMETER netInterface
+	Specify interface name, mode and vswitch, arrays  name, vswitch, vlan
+
+.PARAMETER EnableVMQ
+
+.PARAMETER AuthorisedIP
+	Specify IP address that can connect to the admin interface
+
 	
 .EXAMPLE
-	new-XGFirewall -SamAccountName Fxcat
+	new-XGFirewall -computername localhost -source "c:\sophos\" -destination "f:\vm\firewall\" -vmname "firewall" -vcpu 2 -mode "nat" -defaultvswitch "wan"
 
 	
 .NOTES
@@ -44,7 +53,7 @@ function new-XGFirewall
 
 	[CmdletBinding(SupportsShouldProcess = $true)]
 	PARAM (
-		[parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ValueFromPipeline = $true)]
+		[parameter(Mandatory = $true)]
 		[String]$vmname,
 
 		[Parameter(mandatory=$false)]
@@ -52,6 +61,13 @@ function new-XGFirewall
 		[ValidateSet("nat","transparant","Promiscuis")]
         [Parameter(mandatory=$false)]
         [String] $mode="nat",
+		[String] $source,
+		[String] $destination,
+		[int] $cpu,
+		[string] $adminvswitch,
+		[string] $adminvlan,
+		[String[]] $NetInterfaces,
+
 		)
 
 	BEGIN
@@ -60,6 +76,35 @@ function new-XGFirewall
 
 	PROCESS 
 	{
+
+		# create the destination folder 
+
+		# copy zip/folder to the destination 
+
+		# create the VM 
+		$xgfirewallRam = get-xgfirewallRam -cpu $cpu
+		New-VM -Verbose -name $vmname -MemoryStartupBytes  $xgfirewallRam  -Generation 1  -Path $path  -ComputerName $computername
+
+		# setup vCpu
+		Set-VMProcessor  -Count $vmProc -VMName $vmname -ComputerName $node
+
+		#remove all net interface 
+		Get-VMNetworkAdapter -VMName $vmname -ComputerName $computername | Remove-VMNetworkAdapter 
+
+		# attach disk to the VM
+
+		 
+
+		
+
+		# create admin netadapter 
+
+		# create x netadapter and configure vlan and vmq
+
+		# static mac Address
+
+		# configure mac spoofing according to the mode
+
 
 
 	}
