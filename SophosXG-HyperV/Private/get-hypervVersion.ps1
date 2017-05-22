@@ -13,9 +13,23 @@ function get-hypervVersion
 
 	PROCESS 
 	{
-        # first try to see if Hyper-V is installed on the remote computer 
 
-        # check The Os Version 
+		try {
+			$hypervHost = get-vmhost -ComputerName $ComputerName 
+
+			# try to count SupportedVmVersions 
+			if ($hypervHost.SupportedVmVersions.Count -eq $null)
+			{
+				return "2102"
+			}
+			else {
+				return "2016"
+			}
+
+		}
+		catch {
+			write-error "No Hyper-v Installed on Host $computername"
+		}
     }
     END 
     {

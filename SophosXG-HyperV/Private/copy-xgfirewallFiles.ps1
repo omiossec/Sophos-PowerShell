@@ -13,56 +13,55 @@ function copy-xgfirewallFiles
 
 	BEGIN
 	{
-        #Zip or Folder
-        #test if the source exist and if it's a ZIP or a folder
-        
-
-
-
+ 
 	}
 
 	PROCESS 
 	{
-
-        if (test-path -Path $source)
+         if (test-path -Path $source)
         {
-            $filetype = get-item $source 
-
-            if ($filetype -isnot [System.IO.DirectoryInfo])
+            #  (Get-Item $source) -is [System.IO.DirectoryInfo]
+            if ((Get-Item $source) -isnot [System.IO.DirectoryInfo])
             {
-                 # check if the file is a zip file
+                write-verbose "Folder $source is not a directory"
+                # check if the file is a zip file
                 $extn = [IO.Path]::GetExtension($source)
                 if ($extn -eq "zip")
                 {
                     #unzip the file in the same folder
-                    $source = expand-xgfirewallzip.ps -FilePath $source -force
+                    write-verbose "Trying to unzip the file"
+                    $source = expand-xgfirewallzip -FilePath $source -force
                 }
 
             }
 
-        if ($computername -eq "Localhost")
+
+         if ($computername -eq "Localhost")
         {
 
-            # test if the destination existe 
+            write-verbose "Try to see if the $destination folder exist"
             if (!(test-path -Path $destination))
             {
                 #try to create the destination
                 try {
+
                     New-Item -ItemType Directory -Path $destination
                 }
                 catch {
-                    Write-Error "Error could not create the directory $destination"
+                    Write-Error "Error could not create the directory $destination on computer $computername"
                     Exit-PSHostProcess
                 }
             }
 
             try 
             {
-                $xgVhds = get-item $source
+                write-verbose "List vhd in $source"
+                $xgVhds = get-childitem $source
 
-                foreach ($vhd in $xgvhd)
+                foreach ($vhd in $xgvhds)
                 {
-                    Join-Path $destination $vhd
+                    $path = Join-Path $destination $vhd
+                    write-verbose "trying to copy $path to $destination"
                 }
 
             
@@ -73,12 +72,9 @@ function copy-xgfirewallFiles
             }
 
 
-
-        }
+        }   
         else 
         {
-
-
             # test the path on the remote computer
             $folderExist = test-xgfirewallFolder -destination $destination -computername $computername
 
@@ -99,20 +95,16 @@ function copy-xgfirewallFiles
             }
 
 
-
-
-
-
-
-
-
-
-
             $session = New-PSSession -ComputerName MEMBERSRV1
             Send-File -Path C:test.xml -Destination C: -Session $session
             Remove-PSSession $session
+        }        
+
+
+
 
         }
+       
     }
 
     END 

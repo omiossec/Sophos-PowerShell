@@ -32,6 +32,7 @@ function add-xgFirewallInterface
         Write-Error -Message "The XG Firewall VM $xgfirewallVm is running on host $computer. Can not add Interface on a non Win2016 Server" -ErrorAction Stop
     }
 
+
     # performe add interface 
 
     Add-VMNetworkAdapter -computername $computername -VMName $xgfirewallVm -name $interfaceName -SwitchName $vswitch
