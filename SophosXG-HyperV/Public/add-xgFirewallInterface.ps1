@@ -1,6 +1,17 @@
 function add-xgFirewallInterface
 {
 
+
+<# 
+This function add a vm netadapter on the XG Firewall (Limited to 7 + 1 Admin)
+Create the interface and name it
+setup the Mac address (optionnal)
+Connect to the vswitch 
+Apply Trunk or Access vlan 
+disable or enable VMQ
+#>
+
+
     [CmdletBinding()]
 	PARAM (
 		[parameter(Mandatory = $true)]
@@ -11,6 +22,9 @@ function add-xgFirewallInterface
         [String] $interfaceName,
         [parameter(Mandatory = $true)]
         [String] $vswitch,
+        [Parameter(mandatory=$false)]
+        [ValidateSet("access","trunk","none")]
+        [String] $mode="none",
         [parameter(Mandatory = $false)]
         [int] $vlan
     )

@@ -40,7 +40,8 @@ function copy-xgfirewallFiles
         {
 
             write-verbose "Try to see if the $destination folder exist"
-            if (!(test-path -Path $destination))
+            $folderExist = test-xgfirewallFolder -destination $destination -computername $computername
+            if (!($folderExist))
             {
                 #try to create the destination
                 try {
@@ -60,8 +61,9 @@ function copy-xgfirewallFiles
 
                 foreach ($vhd in $xgvhds)
                 {
-                    $path = Join-Path $destination $vhd
+                    $path = Join-Path $source $vhd
                     write-verbose "trying to copy $path to $destination"
+                    Copy-Item -Path $path -Destination $destination
                 }
 
             
@@ -78,15 +80,33 @@ function copy-xgfirewallFiles
             # test the path on the remote computer
             $folderExist = test-xgfirewallFolder -destination $destination -computername $computername
 
+            if (!$folderExist)
+            {
+                new-xgfirewallFolder -destination $destination -computername $computername
+
+            }
+
             try 
             {
-                $xgVhds = get-item $source
+                $pssession = new-pssession -ComputerName $computername
 
-                foreach ($vhd in $xgvhd)
-                {
-                    Join-Path $destination $vhd
+                invoke-command -session $pssession -ScriptBlock {
+
+
+                    $xgVhds = get-childitem $using:source
+
+                    foreach ($vhd in $xgvhds)
+                    {
+                        Join-Path $using:destination $vhd
+                        $path = Join-Path $using:source $vhd
+                        write-verbose "trying to copy $path to $using:destination"
+                        Copy-Item -Path $path -Destination $using:destination
+                    }
+
+
                 }
-
+                
+                
             
             }
             catch 
@@ -94,10 +114,12 @@ function copy-xgfirewallFiles
 
             }
 
-
+<#
             $session = New-PSSession -ComputerName MEMBERSRV1
             Send-File -Path C:test.xml -Destination C: -Session $session
             Remove-PSSession $session
+
+#>
         }        
 
 

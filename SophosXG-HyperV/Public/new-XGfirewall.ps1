@@ -67,6 +67,7 @@ function new-XGFirewall
 		[string] $adminvswitch,
 		[string] $adminvlan,
 		[String[]] $NetInterfaces,
+		[String[]] $PermitedAdminIP
 
 		)
 
@@ -98,6 +99,8 @@ function new-XGFirewall
 		
 
 		# create admin netadapter 
+
+		new-vmnetadapter -name XGAdmin
 
 		# create x netadapter and configure vlan and vmq
 
